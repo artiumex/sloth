@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const axios = require('axios').default;
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -7,7 +8,7 @@ module.exports = {
 	async execute(client, interaction, lib) {
 		await interaction.deferReply();
 
-		const response = await lib.get('https://api.thecatapi.com/v1/images/search', {
+		const response = await axios.get('https://api.thecatapi.com/v1/images/search', {
 			params: {
 				"x-api-key": process.env.dogapikey
 			}

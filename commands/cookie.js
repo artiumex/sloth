@@ -8,7 +8,7 @@ module.exports = {
 	async execute(client, interaction, lib) {
 		await interaction.deferReply();
 
-		const [self, them] = lib.getUsers([
+		const [self, them] = await lib.getUsers([
 			interaction.user.id,
 			interaction.options.getUser('target').id
 		]);

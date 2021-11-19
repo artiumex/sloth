@@ -10,5 +10,25 @@
     "moment": "^2.29.1",
     "mongoose": "^6.0.13",
     "node-cron": "^3.0.0"
-  }
+  },
+  "name": "node-1661",
+  "version": "1.0.0",
+	"engines": {
+    "node": "14.x"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artiumex/sloth.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artiumex/sloth/issues"
+  },
+  "homepage": "https://github.com/artiumex/sloth#readme",
+  "description": ""
 }

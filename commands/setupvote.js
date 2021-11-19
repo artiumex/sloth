@@ -27,7 +27,7 @@ module.exports = {
 			if (m.roles.cache.some(role => role.id === vote_stuff.partrole)){
 				answers.push({
 					name: m.nickname ? m.nickname : m.user.username,
-					at: m.toString()
+					at: m.user.toString()
 				});
 			}
 		});

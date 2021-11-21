@@ -1,6 +1,8 @@
 const { bold, SlashCommandBuilder } = require('@discordjs/builders');
 const axios = require('axios').default;
 
+var emojis = "😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🤭 🤫 🤥 😶 😐 😑 😬 🙄 😯 😦 😧 😮 😲 🥱 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 🙀 😿 😾 🧳 🌂 ☂️ 🧵 🪡 🪢 🧶 👓 🥽 🥼 🦺 👔 👕 👖 🧣 🧤 🧥 🧦 👗 👘 🥻 🩴 🩱 🩲 🩳 👙 👚 👛 👜 👝 🎒 👑 👒 🎩 🎓 🧢 ⛑ 🪖 💄 💍 💼".split(' ');
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('setupvote')
@@ -20,43 +22,35 @@ module.exports = {
 		const vote_stuff = await lib.voteBot();
 		const guild = interaction.guild;
 		const participant_role = await guild.roles.fetch(vote_stuff.partrole);
-		const winner_role = await guild.roles.fetch(vote_stuff.winnerrole);
 		
+		const history_f = vote_stuff.history.map(e => e.userId);
+		const history = history_f.length > 3 ? history_f.slice(0,3) : history_f;
+
+		function grabEmoji(){
+			const randInd = Math.floor(Math.random() * emojis.length);
+			const emoji = emojis.splice(randInd,1)[0];
+			return emoji
+		}
+
 		await guild.members.fetch();
 		guild.members.cache.forEach(m=>{
-			if (m.roles.cache.some(role => role.id === vote_stuff.partrole)){
+			if (m.roles.cache.some(role => role.id === vote_stuff.partrole) && !history.includes(m.user.id)){
 				answers.push({
 					name: m.nickname ? m.nickname : m.user.username,
-					at: m.user.toString()
+					at: m.user.toString(),
+					emoji: grabEmoji()
 				});
 			}
 		});
 
-		const data = { 
-			"poll": {
-				"title": "Who is the Glory Hole?",
-				"answers": answers.map(e => e.name),
-				"priv": true,
-				"ma": false
-			}
-		}
 
-		const headers = {
-			'API-KEY': process.env.strawpoll
-		}
+		const reply = await interaction.editReply({
+			content: `${bold("Here's the list of the participants")}:\n${answers.map(e => `${e.emoji} ${e.at}`).join('\n')}\n\n@everyone`,
+			fetchReply: true
+		});
 
-		const sp = await axios.post('https://strawpoll.com/api/poll', data, {headers: headers});
-
-		console.log(sp.data);
-		if (sp.data.success){
-			await interaction.editReply({
-				content: `${bold("Here's the list of the participants")}:\n${answers.map(e => e.at).join('\n')}\n\nLink: https://strawpoll.com/${sp.data.content_id}`
-			});
-		} else {
-			await interaction.editReply({
-				content: `Something went wrong.... try again!`,
-				ephemeral: true
-			});
+		for (const person of answers){
+			await reply.react(person.emoji);
 		}
 	},
 };

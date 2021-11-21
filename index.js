@@ -7,8 +7,6 @@ const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 
 const djs_builders = require('@discordjs/builders');
 
-
-
 const usersSchema = new mongoose.Schema({
 	_id: mongoose.Schema.Types.ObjectId,
 	userid: String,

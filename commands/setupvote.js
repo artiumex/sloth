@@ -1,24 +1,24 @@
 const { bold, SlashCommandBuilder } = require('@discordjs/builders');
 const axios = require('axios').default;
 
-var emojis = "😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🤭 🤫 🤥 😶 😐 😑 😬 🙄 😯 😦 😧 😮 😲 🥱 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 🙀 😿 😾 🧳 🌂 ☂️ 🧵 🪡 🪢 🧶 👓 🥽 🥼 🦺 👔 👕 👖 🧣 🧤 🧥 🧦 👗 👘 🥻 🩴 🩱 🩲 🩳 👙 👚 👛 👜 👝 🎒 👑 👒 🎩 🎓 🧢 ⛑ 🪖 💄 💍 💼".split(' ');
+var emojis = "😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🤭 🤫 🤥 😶 😐 😑 😬 🙄 😯 😦 😧 😮 😲 🥱 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 🙀 😿 😾 🧳 🌂 ☂️ 🧵 🪡 🪢 🧶 👓 🥽 🥼 🦺 👔 👕 👖 🧣 🧤 🧥 🧦 🩴 🩱 🩲 🩳 👙 🎒 👑 👒 🎩 🎓 🧢 ⛑ 🪖 💄 💍 💼".split(' ');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('setupvote')
 		.setDescription('Admin Command. Setups voting!'),
 	async execute(client, interaction, lib) {
-		if(!interaction.member.roles.cache.some(role => role.id === process.env.admins)) {
+		if(!interaction.member.roles.cache.some(role => role.id === process.env.admins) && false) {
 			await interaction.reply({
 				content: "You need to be an admin to use that command!",
 				ephemeral: true
 			});
 			return
 		} else {
-			await interaction.deferReply(/*{ephemeral: true}*/);
+			await interaction.deferReply();
 		}
 
-		var answers = [];
+		var answers = [], voted = [];
 		const vote_stuff = await lib.voteBot();
 		const guild = interaction.guild;
 		const participant_role = await guild.roles.fetch(vote_stuff.partrole);
@@ -34,12 +34,14 @@ module.exports = {
 
 		await guild.members.fetch();
 		guild.members.cache.forEach(m=>{
-			if (m.roles.cache.some(role => role.id === vote_stuff.partrole) && !history.includes(m.user.id)){
-				answers.push({
+			if (/*m.roles.cache.some(role => role.id === vote_stuff.partrole) &&*/ !history.includes(m.user.id)){
+				const data = {
 					name: m.nickname ? m.nickname : m.user.username,
 					at: m.user.toString(),
-					emoji: grabEmoji()
-				});
+					emoji: grabEmoji(),
+					id: m.user.id
+				}
+				answers.push(data);
 			}
 		});
 
@@ -49,8 +51,29 @@ module.exports = {
 			fetchReply: true
 		});
 
-		for (const person of answers){
-			await reply.react(person.emoji);
+		const emoji_list = answers.map(e=>e.emoji);
+		for (const e of emoji_list){
+			await reply.react(e);
 		}
+
+		function delReaction(reaction, user, reason){
+			reaction.users.remove(user.id).catch(err=>throw err);
+			console.log(reason);
+		}
+
+		const collector = reply.createReactionCollector({ time: 10800000 });
+
+		collector.on('collect', (reaction, user) => {
+			if (user.id == client.user.id) return;
+			console.log('logging collection');
+			if (!emoji_list.includes(reaction.emoji.name)) return delReaction(reaction, user, 'wrong emoji');
+			if (voted.includes(user.id)) return delReaction(reaction, user, 'already voted');
+			
+			voted.push(user.id);
+		});
+
+		collector.on('end', collected => {
+			console.log(`Collected ${collected.size} items`);
+		});
 	},
 };

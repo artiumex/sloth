@@ -57,7 +57,7 @@ module.exports = {
 		}
 
 		function delReaction(reaction, user, reason){
-			reaction.users.remove(user.id).catch(err=>throw err);
+			reaction.users.remove(user.id).catch(err=>console.log(err));
 			console.log(reason);
 		}
 

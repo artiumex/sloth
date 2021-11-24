@@ -8,7 +8,7 @@ module.exports = {
 		.setName('setupvote')
 		.setDescription('Admin Command. Setups voting!'),
 	async execute(client, interaction, lib) {
-		if(!interaction.member.roles.cache.some(role => role.id === process.env.admins) && false) {
+		if(!interaction.member.roles.cache.some(role => role.id === process.env.admins)) {
 			await interaction.reply({
 				content: "You need to be an admin to use that command!",
 				ephemeral: true
@@ -34,7 +34,7 @@ module.exports = {
 
 		await guild.members.fetch();
 		guild.members.cache.forEach(m=>{
-			if (/*m.roles.cache.some(role => role.id === vote_stuff.partrole) &&*/ !history.includes(m.user.id)){
+			if (m.roles.cache.some(role => role.id === vote_stuff.partrole) && !history.includes(m.user.id)){
 				const data = {
 					name: m.nickname ? m.nickname : m.user.username,
 					at: m.user.toString(),
@@ -55,25 +55,5 @@ module.exports = {
 		for (const e of emoji_list){
 			await reply.react(e);
 		}
-
-		function delReaction(reaction, user, reason){
-			reaction.users.remove(user.id).catch(err=>console.log(err));
-			console.log(reason);
-		}
-
-		const collector = reply.createReactionCollector({ time: 10800000 });
-
-		collector.on('collect', (reaction, user) => {
-			if (user.id == client.user.id) return;
-			console.log('logging collection');
-			if (!emoji_list.includes(reaction.emoji.name)) return delReaction(reaction, user, 'wrong emoji');
-			if (voted.includes(user.id)) return delReaction(reaction, user, 'already voted');
-			
-			voted.push(user.id);
-		});
-
-		collector.on('end', collected => {
-			console.log(`Collected ${collected.size} items`);
-		});
 	},
 };

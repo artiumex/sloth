@@ -2,8 +2,9 @@ const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
-const guildId = ["402919650985246741", "905525060427730994"];
-const clientId = "905998455812530176";
+const guildId = ["402919650985246741", "781397300647559188"];
+//const guildId = ["402919650985246741"]; //just test server
+const clientId = "933753878615314552";
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
